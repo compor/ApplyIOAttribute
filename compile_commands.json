@@ -1,0 +1,12 @@
+[
+{
+  "directory": "/bulk/workbench/builds/ApplyIOAttribute",
+  "command": "/bulk/workbench/llvm/3.7.0/toolchain8/bin/clang++   -DLLVMApplyIOAttributePass_EXPORTS -DVERSION_STRING=\"\" -D_DEBUG -D__STDC_CONSTANT_MACROS -D__STDC_CONSTANT_MACROS -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS -I/bulk/workbench/llvm/3.7.0/toolchain8/include -I/bulk/workbench/repos/ApplyIOAttribute/include  -stdlib=libc++ -fPIC -fvisibility-inlines-hidden -Werror=date-time -std=c++11 -std=c++14 -fno-rtti -fno-exceptions -g -fPIC   -o CMakeFiles/LLVMApplyIOAttributePass.dir/lib/ApplyIOAttributePass.cpp.o -c /bulk/workbench/repos/ApplyIOAttribute/lib/ApplyIOAttributePass.cpp",
+  "file": "/bulk/workbench/repos/ApplyIOAttribute/lib/ApplyIOAttributePass.cpp"
+},
+{
+  "directory": "/bulk/workbench/builds/ApplyIOAttribute/unittests",
+  "command": "/bulk/workbench/llvm/3.7.0/toolchain8/bin/clang++   -D_DEBUG -D__STDC_CONSTANT_MACROS -D__STDC_CONSTANT_MACROS -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS -I/bulk/workbench/repos/ApplyIOAttribute/unittests -I/usr/local/gtest-libcxx/include -I/bulk/workbench/llvm/3.7.0/toolchain8/include -I/bulk/workbench/boost/015900/install/include -I/bulk/workbench/repos/ApplyIOAttribute/include  -stdlib=libc++ -fPIC -fvisibility-inlines-hidden -Werror=date-time -std=c++11 -std=c++14 -fno-rtti -fno-exceptions -g   -o CMakeFiles/TestApplyIOAttribute.dir/TestApplyIOAttribute.cpp.o -c /bulk/workbench/repos/ApplyIOAttribute/unittests/TestApplyIOAttribute.cpp",
+  "file": "/bulk/workbench/repos/ApplyIOAttribute/unittests/TestApplyIOAttribute.cpp"
+}
+]

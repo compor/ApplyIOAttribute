@@ -8,8 +8,22 @@
 #include "llvm/Pass.h"
 // using llvm::ModulePass
 
+// TODO to move to source file
 #include "llvm/Analysis/TargetLibraryInfo.h"
 // using llvm::LibFunc
+
+#include "llvm/IR/Function.h"
+// using llvm::Function
+
+#include "llvm/IR/BasicBlock.h"
+// using llvm::BasicBlock
+
+#include "llvm/IR/Instruction.h"
+// using llvm::Instruction
+
+#include "llvm/IR/Instructions.h"
+
+#include "llvm/IR/IntrinsicInst.h"
 
 #include <set>
 // using std::set
@@ -28,7 +42,36 @@ public:
     return;
   }
 
+  bool hasIO(const llvm::Function &Func) const {
+    for (const auto &bb : Func)
+      for (const auto &inst : bb) {
+        const auto *calledFunc = getCalledFunction(inst);
+        if (calledFunc) {
+          // do stuff
+        }
+      }
+
+    return false;
+  }
+
 private:
+  llvm::Function *getCalledFunction(const llvm::Instruction &Inst) const {
+    if (llvm::isa<llvm::IntrinsicInst>(Inst))
+      return nullptr;
+
+    const auto *callInst = llvm::dyn_cast<llvm::CallInst>(&Inst);
+    if (!callInst)
+      return nullptr;
+
+    const auto *calledFunc = callInst->getCalledFunction();
+    if (!calledFunc)
+      return nullptr;
+
+    // callInst->getCalledFunction()->isDeclaration()
+
+    return const_cast<llvm::Function *>(calledFunc);
+  }
+
   void setupIOFuncs() {
     // TODO what about calls that might have other side-effects
     // system()

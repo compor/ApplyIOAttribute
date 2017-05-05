@@ -36,7 +36,7 @@ namespace icsa {
 
 class ApplyIOAttribute {
 public:
-  ApplyIOAttribute() {
+  ApplyIOAttribute(const llvm::TargetLibraryInfo &TLI) : m_TLI{TLI} {
     setupIOFuncs();
 
     return;
@@ -47,7 +47,11 @@ public:
       for (const auto &inst : bb) {
         const auto *calledFunc = getCalledFunction(inst);
         if (calledFunc) {
-          // do stuff
+          const auto &funcName = calledFunc->getName();
+          llvm::LibFunc::Func TLIFunc;
+          if (m_TLI.getLibFunc(funcName, TLIFunc) && m_TLI.has(TLIFunc) &&
+              IOLibFuncs.end() != IOLibFuncs.find(TLIFunc))
+            return true;
         }
       }
 
@@ -67,7 +71,8 @@ private:
     if (!calledFunc)
       return nullptr;
 
-    // callInst->getCalledFunction()->isDeclaration()
+    if (!callInst->getCalledFunction()->isDeclaration())
+      return nullptr;
 
     return const_cast<llvm::Function *>(calledFunc);
   }
@@ -166,6 +171,7 @@ private:
     return;
   }
 
+  const llvm::TargetLibraryInfo &m_TLI;
   std::set<llvm::LibFunc::Func> IOLibFuncs;
 };
 

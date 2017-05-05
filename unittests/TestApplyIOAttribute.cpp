@@ -24,9 +24,9 @@
 // using llvm::Pass
 // using llvm::PassInfo
 
-#include "llvm/Analysis/LoopInfo.h"
-// using llvm::LoopInfoWrapperPass
-// using llvm::LoopInfo
+#include "llvm/Analysis/TargetLibraryInfo.h"
+// using llvm::TargetLibraryInfoWrapperPass
+// using llvm::TargetLibraryInfo
 
 #include "llvm/Support/SourceMgr.h"
 // using llvm::SMDiagnostic
@@ -116,24 +116,21 @@ public:
         auto *PI = new llvm::PassInfo("Utility pass for unit tests", "", &ID,
                                       nullptr, true, true);
 
+        llvm::initializeTargetLibraryInfoWrapperPassPass(*registry);
         registry->registerPass(*PI, false);
 
         return 0;
       }
 
       void getAnalysisUsage(llvm::AnalysisUsage &AU) const override {
+        AU.addRequired<llvm::TargetLibraryInfoWrapperPass>();
         AU.setPreservesCFG();
 
         return;
       }
 
       bool runOnModule(llvm::Module &M) override {
-        auto &LI = getAnalysis<llvm::LoopInfoWrapperPass>().getLoopInfo();
-        // LI.print(llvm::outs());
-
-        auto &CurLoop = *LI.begin();
-        assert(CurLoop && "Loop ptr is invalid");
-
+        const auto &TLI = getAnalysis<llvm::TargetLibraryInfoWrapperPass>().getTLI();
         test_result_map::const_iterator found;
 
         // subcase

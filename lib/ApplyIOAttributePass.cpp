@@ -56,8 +56,8 @@
 
 // plugin registration for opt
 
-char ApplyIOAttributePass::ID = 0;
-static llvm::RegisterPass<ApplyIOAttributePass>
+char icsa::ApplyIOAttributePass::ID = 0;
+static llvm::RegisterPass<icsa::ApplyIOAttributePass>
     X("apply-io-attribute", "apply IO attribute pass", false, false);
 
 // plugin registration for clang
@@ -71,7 +71,7 @@ static llvm::RegisterPass<ApplyIOAttributePass>
 static void
 registerApplyIOAttributePass(const llvm::PassManagerBuilder &Builder,
                              llvm::legacy::PassManagerBase &PM) {
-  PM.add(new ApplyIOAttributePass());
+  PM.add(new icsa::ApplyIOAttributePass());
 
   return;
 }
@@ -82,8 +82,8 @@ static llvm::RegisterStandardPasses
 
 //
 
-namespace {
+namespace icsa {
 
 bool ApplyIOAttributePass::runOnModule(llvm::Module &M) { return false; }
 
-} // namespace unnamed end
+} // namespace icsa end

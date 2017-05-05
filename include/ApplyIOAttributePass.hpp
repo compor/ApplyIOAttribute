@@ -12,7 +12,7 @@ namespace llvm {
 class Module;
 } // namespace llvm end
 
-namespace {
+namespace icsa {
 
 class ApplyIOAttributePass : public llvm::ModulePass {
 public:
@@ -23,6 +23,6 @@ public:
   bool runOnModule(llvm::Module &M) override;
 };
 
-} // namespace unnamed end
+} // namespace icsa end
 
 #endif // end of include guard: APPLYIOATTRIBUTEPASS_HPP

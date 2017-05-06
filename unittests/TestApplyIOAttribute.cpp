@@ -204,5 +204,14 @@ TEST_F(TestApplyIOAttribute, IgnoreMockLibFuncDefinition) {
   ExpectTestPass(trm);
 }
 
+TEST_F(TestApplyIOAttribute, IgnorenNonIOLibFunc) {
+  ParseAssembly("test04.ll");
+
+  test_result_map trm;
+
+  trm.insert({"has IO call", false});
+  ExpectTestPass(trm);
+}
+
 } // namespace anonymous end
 } // namespace icsa end

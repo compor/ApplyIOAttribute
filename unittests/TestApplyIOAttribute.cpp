@@ -54,10 +54,11 @@
 namespace icsa {
 namespace {
 
-using test_result_t = boost::variant<unsigned int>;
+using test_result_t = boost::variant<bool, unsigned int>;
 using test_result_map = std::map<std::string, test_result_t>;
 
 struct test_result_visitor : public boost::static_visitor<unsigned int> {
+  unsigned int operator()(bool b) const { return b ? 1 : 0; }
   unsigned int operator()(unsigned int i) const { return i; }
 };
 

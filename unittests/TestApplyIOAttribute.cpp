@@ -66,7 +66,8 @@ class TestApplyIOAttribute : public testing::Test {
 public:
   enum struct AssembyHolderType : int { FILE_TYPE, STRING_TYPE };
 
-  TestApplyIOAttribute() : m_Module{nullptr}, m_TestDataDir{"./unittests/data/"} {}
+  TestApplyIOAttribute()
+      : m_Module{nullptr}, m_TestDataDir{"./unittests/data/"} {}
 
   void ParseAssembly(
       const char *AssemblyHolder,
@@ -129,13 +130,18 @@ public:
             getAnalysis<llvm::TargetLibraryInfoWrapperPass>().getTLI();
         test_result_map::const_iterator found;
 
+        const auto *func = M.getFunction("test");
+
         // subcase
         found = lookup("has IO call");
+        if (found != std::end(m_trm)) {
+          ApplyIOAttribute ioattr(TLI);
 
-        const auto &rv = true;
-        const auto &ev =
-            boost::apply_visitor(test_result_visitor(), found->second);
-        EXPECT_EQ(ev, rv) << found->first;
+          const auto &rv = ioattr.hasIO(*func);
+          const auto &ev =
+              boost::apply_visitor(test_result_visitor(), found->second);
+          EXPECT_EQ(ev, rv) << found->first;
+        }
 
         return false;
       }

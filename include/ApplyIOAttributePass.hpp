@@ -46,12 +46,15 @@ public:
     for (const auto &bb : Func)
       for (const auto &inst : bb) {
         const auto *calledFunc = getCalledFunction(inst);
+
         if (calledFunc) {
           const auto &funcName = calledFunc->getName();
           llvm::LibFunc::Func TLIFunc;
+
           if (m_TLI.getLibFunc(funcName, TLIFunc) && m_TLI.has(TLIFunc) &&
-              IOLibFuncs.end() != IOLibFuncs.find(TLIFunc))
+              IOLibFuncs.end() != IOLibFuncs.find(TLIFunc)) {
             return true;
+          }
         }
       }
 

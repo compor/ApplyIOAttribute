@@ -62,11 +62,11 @@ struct test_result_visitor : public boost::static_visitor<unsigned int> {
   unsigned int operator()(unsigned int i) const { return i; }
 };
 
-class TestDummy : public testing::Test {
+class TestApplyIOAttribute : public testing::Test {
 public:
   enum struct AssembyHolderType : int { FILE_TYPE, STRING_TYPE };
 
-  TestDummy() : m_Module{nullptr}, m_TestDataDir{"./unittests/data/"} {}
+  TestApplyIOAttribute() : m_Module{nullptr}, m_TestDataDir{"./unittests/data/"} {}
 
   void ParseAssembly(
       const char *AssemblyHolder,
@@ -171,8 +171,17 @@ protected:
   const char *m_TestDataDir;
 };
 
-TEST_F(TestDummy, RegularLoopExits) {
+TEST_F(TestApplyIOAttribute, LibIOFuncExists1) {
   ParseAssembly("test01.ll");
+
+  test_result_map trm;
+
+  trm.insert({"has IO call", true});
+  ExpectTestPass(trm);
+}
+
+TEST_F(TestApplyIOAttribute, LibIOFuncExists2) {
+  ParseAssembly("test02.ll");
 
   test_result_map trm;
 

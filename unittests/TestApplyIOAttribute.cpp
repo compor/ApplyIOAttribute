@@ -63,32 +63,26 @@ struct test_result_visitor : public boost::static_visitor<unsigned int> {
 
 class TestDummy : public testing::Test {
 public:
+  enum struct AssembyHolderType : int { FILE_TYPE, STRING_TYPE };
+
   TestDummy() : m_Module{nullptr}, m_TestDataDir{"./unittests/data/"} {}
 
-  void ParseAssemblyString(const char *Assembly) {
+  void ParseAssembly(
+      const char *AssemblyHolder,
+      const AssembyHolderType asmHolder = AssembyHolderType::FILE_TYPE) {
     llvm::SMDiagnostic err;
 
-    m_Module =
-        llvm::parseAssemblyString(Assembly, err, llvm::getGlobalContext());
+    if (AssembyHolderType::FILE_TYPE == asmHolder) {
+      std::string fullFilename{m_TestDataDir};
+      fullFilename += AssemblyHolder;
 
-    std::string errMsg;
-    llvm::raw_string_ostream os(errMsg);
-    err.print("", os);
+      m_Module =
+          llvm::parseAssemblyFile(fullFilename, err, llvm::getGlobalContext());
 
-    if (!m_Module)
-      llvm::report_fatal_error(os.str().c_str());
-
-    return;
-  }
-
-  void ParseAssemblyFile(const char *Filename) {
-    llvm::SMDiagnostic err;
-
-    std::string fullFilename{m_TestDataDir};
-    fullFilename += Filename;
-
-    m_Module =
-        llvm::parseAssemblyFile(fullFilename, err, llvm::getGlobalContext());
+    } else {
+      m_Module = llvm::parseAssemblyString(AssemblyHolder, err,
+                                           llvm::getGlobalContext());
+    }
 
     std::string errMsg;
     llvm::raw_string_ostream os(errMsg);
@@ -130,7 +124,8 @@ public:
       }
 
       bool runOnModule(llvm::Module &M) override {
-        const auto &TLI = getAnalysis<llvm::TargetLibraryInfoWrapperPass>().getTLI();
+        const auto &TLI =
+            getAnalysis<llvm::TargetLibraryInfoWrapperPass>().getTLI();
         test_result_map::const_iterator found;
 
         // subcase
@@ -175,27 +170,8 @@ protected:
   const char *m_TestDataDir;
 };
 
-TEST_F(TestDummy, DISABLE_RegularLoopExits) {
-  ParseAssemblyString("define void @test() {\n"
-                "%i = alloca i32, align 4\n"
-                "%a = alloca i32, align 4\n"
-                "store i32 100, i32* %i, align 4\n"
-                "store i32 0, i32* %a, align 4\n"
-                "br label %1\n"
-
-                "%2 = load i32, i32* %i, align 4\n"
-                "%3 = add nsw i32 %2, -1\n"
-                "store i32 %3, i32* %i, align 4\n"
-                "%4 = icmp ne i32 %3, 0\n"
-                "br i1 %4, label %5, label %8\n"
-
-                "%6 = load i32, i32* %a, align 4\n"
-                "%7 = add nsw i32 %6, 1\n"
-                "store i32 %7, i32* %a, align 4\n"
-                "br label %1\n"
-
-                "ret void\n"
-                "}\n");
+TEST_F(TestDummy, RegularLoopExits) {
+  ParseAssembly("test01.ll");
 
   test_result_map trm;
 

@@ -130,9 +130,9 @@ public:
         test_result_map::const_iterator found;
 
         // subcase
-        found = lookup("number of exits");
+        found = lookup("has IO call");
 
-        const auto &rv = 0;
+        const auto &rv = true;
         const auto &ev =
             boost::apply_visitor(test_result_visitor(), found->second);
         EXPECT_EQ(ev, rv) << found->first;
@@ -176,7 +176,7 @@ TEST_F(TestDummy, RegularLoopExits) {
 
   test_result_map trm;
 
-  trm.insert({"number of exits", 1});
+  trm.insert({"has IO call", true});
   ExpectTestPass(trm);
 }
 

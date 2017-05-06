@@ -195,5 +195,14 @@ TEST_F(TestApplyIOAttribute, LibIOFuncExists2) {
   ExpectTestPass(trm);
 }
 
+TEST_F(TestApplyIOAttribute, IgnoreMockLibFuncDefinition) {
+  ParseAssembly("test03.ll");
+
+  test_result_map trm;
+
+  trm.insert({"has IO call", false});
+  ExpectTestPass(trm);
+}
+
 } // namespace anonymous end
 } // namespace icsa end

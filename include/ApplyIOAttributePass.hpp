@@ -25,6 +25,8 @@
 
 #include "llvm/IR/IntrinsicInst.h"
 
+#include <cxxabi.h>
+
 #include <set>
 // using std::set
 
@@ -57,6 +59,12 @@ public:
           }
         }
       }
+
+    return false;
+  }
+
+  bool hasCxxIO(const llvm::Function &Func) const {
+    const auto &funcName = Func.getName();
 
     return false;
   }
@@ -180,8 +188,36 @@ private:
     return;
   }
 
+  void setupCxxIOFuncs() {
+    CxxIOFuncs.insert("put");
+    CxxIOFuncs.insert("write");
+    CxxIOFuncs.insert("flush");
+    CxxIOFuncs.insert("get");
+    CxxIOFuncs.insert("peek");
+    CxxIOFuncs.insert("unget");
+    CxxIOFuncs.insert("putback");
+    CxxIOFuncs.insert("getline");
+    CxxIOFuncs.insert("ignore");
+    CxxIOFuncs.insert("readsome");
+    CxxIOFuncs.insert("sync");
+    CxxIOFuncs.insert("open");
+    CxxIOFuncs.insert("close");
+    CxxIOFuncs.insert("operator<<");
+    CxxIOFuncs.insert("operator>>");
+
+    CxxIOTypes.insert("basic_ostream");
+    CxxIOTypes.insert("basic_istream");
+    CxxIOTypes.insert("basic_iostream");
+    CxxIOTypes.insert("basic_ofstream");
+    CxxIOTypes.insert("basic_istream");
+    CxxIOTypes.insert("basic_fstream");
+  }
+
   const llvm::TargetLibraryInfo &m_TLI;
   std::set<llvm::LibFunc::Func> IOLibFuncs;
+
+  std::set<std::string> CxxIOFuncs;
+  std::set<std::string> CxxIOTypes;
 };
 
 class ApplyIOAttributePass : public llvm::ModulePass {

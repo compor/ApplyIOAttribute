@@ -84,6 +84,23 @@ static llvm::RegisterStandardPasses
 
 namespace icsa {
 
-bool ApplyIOAttributePass::runOnModule(llvm::Module &M) { return false; }
+void ApplyIOAttributePass::getAnalysisUsage(llvm::AnalysisUsage &AU) const {
+  AU.addRequired<llvm::TargetLibraryInfoWrapperPass>();
+  AU.setPreservesCFG();
+
+  return;
+}
+
+bool ApplyIOAttributePass::runOnModule(llvm::Module &M) {
+  bool hasChanged = false;
+  const auto &TLI = getAnalysis<llvm::TargetLibraryInfoWrapperPass>().getTLI();
+  ApplyIOAttribute aioattr(TLI);
+
+  for (auto &func : M)
+    if (aioattr.hasIO(func))
+      hasChanged |= aioattr.apply(func);
+
+  return hasChanged;
+}
 
 } // namespace icsa end

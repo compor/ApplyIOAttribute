@@ -18,6 +18,12 @@
 #include "llvm/IR/BasicBlock.h"
 // using llvm::BasicBlock
 
+#include "llvm/IR/Type.h"
+// using llvm::Type
+
+#include "llvm/IR/DerivedTypes.h"
+// using llvm::FunctionType
+
 #include "llvm/IR/Instruction.h"
 // using llvm::Instruction
 
@@ -51,6 +57,13 @@ class Module;
 
 namespace icsa {
 
+struct malloc_deleter {
+  template <typename T> void operator()(T *ptr) const { std::free(ptr); }
+};
+
+template <typename T>
+using malloc_unique_ptr = std::unique_ptr<T, malloc_deleter>;
+
 class ApplyIOAttribute {
 public:
   ApplyIOAttribute(const llvm::TargetLibraryInfo &TLI) : m_TLI{TLI} {
@@ -79,9 +92,41 @@ public:
   }
 
   bool hasCxxIO(const llvm::Function &Func) const {
-    const auto &funcName = Func.getName();
+    if (Func.getFunctionType()->getNumParams() < 1)
+      return false;
 
-    return false;
+    if (!Func.hasName())
+      return false;
+
+    const auto &funcName = Func.getName();
+    auto status = 0;
+
+    const auto &demangledName = malloc_unique_ptr<char>(
+        abi::__cxa_demangle(funcName.data(), 0, 0, &status));
+
+    if (status)
+      return false;
+
+    if (std::end(CxxIOFuncs) == CxxIOFuncs.find(demangledName.get()))
+      return false;
+
+    const auto *potentialClassTypePtr = Func.getFunctionType()->getParamType(0);
+    if (!potentialClassTypePtr->isPointerTy())
+      return false;
+
+    const auto *potentialClassType =
+        llvm::dyn_cast<llvm::PointerType>(potentialClassTypePtr)
+            ->getElementType();
+
+    if (!potentialClassType->isStructTy())
+      return false;
+
+    const auto &potentialClassTypeName = potentialClassType->getStructName();
+
+    if (std::end(CxxIOTypes) == CxxIOTypes.find(potentialClassTypeName.data()))
+      return false;
+
+    return true;
   }
 
   bool apply(llvm::Function &func) const {

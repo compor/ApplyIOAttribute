@@ -80,7 +80,6 @@ public:
 
       m_Module =
           llvm::parseAssemblyFile(fullFilename, err, llvm::getGlobalContext());
-
     } else {
       m_Module = llvm::parseAssemblyString(AssemblyHolder, err,
                                            llvm::getGlobalContext());
@@ -210,6 +209,15 @@ TEST_F(TestApplyIOAttribute, IgnoreNonIOLibFunc) {
   test_result_map trm;
 
   trm.insert({"has IO call", false});
+  ExpectTestPass(trm);
+}
+
+TEST_F(TestApplyIOAttribute, CxxIOFuncExists1) {
+  ParseAssembly("test10.ll");
+
+  test_result_map trm;
+
+  trm.insert({"has IO call", true});
   ExpectTestPass(trm);
 }
 

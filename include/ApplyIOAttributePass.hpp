@@ -22,10 +22,25 @@
 // using llvm::Instruction
 
 #include "llvm/IR/Instructions.h"
+// using llvm::CallInst
 
 #include "llvm/IR/IntrinsicInst.h"
+// using llvm::IntrinsicInst
+
+#include "llvm/ADT/StringRef.h"
+// using llvm::StringRef
+
+#include "llvm/Support/Casting.h"
+// using llvm::dyn_cast
 
 #include <cxxabi.h>
+// using abi::__cxa_demangle
+
+#include <cstdlib>
+// using std::free
+
+#include <memory>
+// using std::unique_ptr
 
 #include <set>
 // using std::set
@@ -49,7 +64,7 @@ public:
       for (const auto &inst : bb) {
         const auto *calledFunc = getCalledFunction(inst);
 
-        if (calledFunc) {
+        if (calledFunc && calledFunc->hasName()) {
           const auto &funcName = calledFunc->getName();
           llvm::LibFunc::Func TLIFunc;
 

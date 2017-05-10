@@ -76,17 +76,24 @@ public:
     for (const auto &bb : Func)
       for (const auto &inst : bb) {
         const auto *calledFunc = getCalledFunction(inst);
-
-        if (calledFunc && calledFunc->hasName()) {
-          const auto &funcName = calledFunc->getName();
-          llvm::LibFunc::Func TLIFunc;
-
-          if (m_TLI.getLibFunc(funcName, TLIFunc) && m_TLI.has(TLIFunc) &&
-              IOLibFuncs.end() != IOLibFuncs.find(TLIFunc)) {
-            return true;
-          }
-        }
+        if (calledFunc)
+          return hasCIO(*calledFunc);
       }
+
+    return false;
+  }
+
+  bool hasCIO(const llvm::Function &Func) const {
+    if (!Func.hasName())
+      return false;
+
+    const auto &funcName = Func.getName();
+    llvm::LibFunc::Func TLIFunc;
+
+    if (m_TLI.getLibFunc(funcName, TLIFunc) && m_TLI.has(TLIFunc) &&
+        IOLibFuncs.end() != IOLibFuncs.find(TLIFunc)) {
+      return true;
+    }
 
     return false;
   }

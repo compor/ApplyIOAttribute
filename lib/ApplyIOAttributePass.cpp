@@ -97,7 +97,8 @@ bool ApplyIOAttributePass::runOnModule(llvm::Module &M) {
   ApplyIOAttribute aioattr(TLI);
 
   for (auto &func : M)
-    if (aioattr.hasIO(func))
+    if (!func.isDeclaration() && !func.hasFnAttribute(aioattr.getIOAttr()) &&
+        aioattr.hasIO(func))
       hasChanged |= aioattr.apply(func);
 
   return hasChanged;

@@ -1,6 +1,3 @@
-; ModuleID = 'test11.cpp'
-target datalayout = "e-m:e-i64:64-f80:128-n8:16:32:64-S128"
-target triple = "x86_64-unknown-linux-gnu"
 
 %"class.std::basic_fstream" = type { %"class.std::basic_iostream.base", %"class.std::basic_filebuf", %"class.std::basic_ios" }
 %"class.std::basic_iostream.base" = type { %"class.std::basic_istream.base", %"class.std::basic_ostream.base" }
@@ -41,7 +38,7 @@ $__clang_call_terminate = comdat any
 @.str = private unnamed_addr constant [10 x i8] c"hello.txt\00", align 1
 
 ; Function Attrs: uwtable
-define void @test() #0 personality i8* bitcast (i32 (...)* @__gxx_personality_v0 to i8*) {
+define void @test() personality i8* bitcast (i32 (...)* @__gxx_personality_v0 to i8*) {
 entry:
   %file = alloca %"class.std::basic_fstream", align 8
   %n = alloca i32, align 4
@@ -85,12 +82,12 @@ terminate.lpad:                                   ; preds = %lpad
   %4 = landingpad { i8*, i32 }
           catch i8* null
   %5 = extractvalue { i8*, i32 } %4, 0
-  call void @__clang_call_terminate(i8* %5) #4
+  call void @__clang_call_terminate(i8* %5)
   unreachable
 }
 
 ; Function Attrs: inlinehint nounwind uwtable
-define linkonce_odr i32 @_ZStorSt13_Ios_OpenmodeS_(i32 %__a, i32 %__b) #1 comdat {
+define linkonce_odr i32 @_ZStorSt13_Ios_OpenmodeS_(i32 %__a, i32 %__b) comdat {
 entry:
   %__a.addr = alloca i32, align 4
   %__b.addr = alloca i32, align 4
@@ -102,20 +99,20 @@ entry:
   ret i32 %or
 }
 
-declare void @_ZNSt13basic_fstreamIcSt11char_traitsIcEEC1EPKcSt13_Ios_Openmode(%"class.std::basic_fstream"*, i8*, i32) #2
+declare void @_ZNSt13basic_fstreamIcSt11char_traitsIcEEC1EPKcSt13_Ios_Openmode(%"class.std::basic_fstream"*, i8*, i32)
 
-declare dereferenceable(280) %"class.std::basic_istream"* @_ZNSirsERi(%"class.std::basic_istream"*, i32* dereferenceable(4)) #2
+declare dereferenceable(280) %"class.std::basic_istream"* @_ZNSirsERi(%"class.std::basic_istream"*, i32* dereferenceable(4))
 
 declare i32 @__gxx_personality_v0(...)
 
-declare void @_ZNSt13basic_fstreamIcSt11char_traitsIcEE5closeEv(%"class.std::basic_fstream"*) #2
+declare void @_ZNSt13basic_fstreamIcSt11char_traitsIcEE5closeEv(%"class.std::basic_fstream"*)
 
-declare void @_ZNSt13basic_fstreamIcSt11char_traitsIcEED1Ev(%"class.std::basic_fstream"*) #2
+declare void @_ZNSt13basic_fstreamIcSt11char_traitsIcEED1Ev(%"class.std::basic_fstream"*)
 
 ; Function Attrs: noinline noreturn nounwind
-define linkonce_odr hidden void @__clang_call_terminate(i8*) #3 comdat {
-  %2 = call i8* @__cxa_begin_catch(i8* %0) #5
-  call void @_ZSt9terminatev() #4
+define linkonce_odr hidden void @__clang_call_terminate(i8*) comdat {
+  %2 = call i8* @__cxa_begin_catch(i8* %0)
+  call void @_ZSt9terminatev()
   unreachable
 }
 
@@ -123,13 +120,3 @@ declare i8* @__cxa_begin_catch(i8*)
 
 declare void @_ZSt9terminatev()
 
-attributes #0 = { uwtable "disable-tail-calls"="false" "less-precise-fpmad"="false" "no-frame-pointer-elim"="true" "no-frame-pointer-elim-non-leaf" "no-infs-fp-math"="false" "no-nans-fp-math"="false" "stack-protector-buffer-size"="8" "target-cpu"="x86-64" "target-features"="+sse,+sse2" "unsafe-fp-math"="false" "use-soft-float"="false" }
-attributes #1 = { inlinehint nounwind uwtable "disable-tail-calls"="false" "less-precise-fpmad"="false" "no-frame-pointer-elim"="true" "no-frame-pointer-elim-non-leaf" "no-infs-fp-math"="false" "no-nans-fp-math"="false" "stack-protector-buffer-size"="8" "target-cpu"="x86-64" "target-features"="+sse,+sse2" "unsafe-fp-math"="false" "use-soft-float"="false" }
-attributes #2 = { "disable-tail-calls"="false" "less-precise-fpmad"="false" "no-frame-pointer-elim"="true" "no-frame-pointer-elim-non-leaf" "no-infs-fp-math"="false" "no-nans-fp-math"="false" "stack-protector-buffer-size"="8" "target-cpu"="x86-64" "target-features"="+sse,+sse2" "unsafe-fp-math"="false" "use-soft-float"="false" }
-attributes #3 = { noinline noreturn nounwind }
-attributes #4 = { noreturn nounwind }
-attributes #5 = { nounwind }
-
-!llvm.ident = !{!0}
-
-!0 = !{!"clang version 3.7.1 (http://llvm.org/git/clang.git 0dbefa1b83eb90f7a06b5df5df254ce32be3db4b) (http://llvm.org/git/llvm.git 33c352b3eda89abc24e7511d9045fa2e499a42e3)"}

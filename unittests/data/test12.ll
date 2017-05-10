@@ -1,6 +1,3 @@
-; ModuleID = 'test12.cpp'
-target datalayout = "e-m:e-i64:64-f80:128-n8:16:32:64-S128"
-target triple = "x86_64-unknown-linux-gnu"
 
 %"class.std::ios_base::Init" = type { i8 }
 %"class.std::basic_ostream" = type { i32 (...)**, %"class.std::basic_ios" }
@@ -24,22 +21,22 @@ target triple = "x86_64-unknown-linux-gnu"
 @_ZSt4cout = external global %"class.std::basic_ostream", align 8
 @llvm.global_ctors = appending global [1 x { i32, void ()*, i8* }] [{ i32, void ()*, i8* } { i32 65535, void ()* @_GLOBAL__sub_I_test12.cpp, i8* null }]
 
-define internal void @__cxx_global_var_init() #0 section ".text.startup" {
+define internal void @__cxx_global_var_init() section ".text.startup" {
 entry:
   call void @_ZNSt8ios_base4InitC1Ev(%"class.std::ios_base::Init"* @_ZStL8__ioinit)
-  %0 = call i32 @__cxa_atexit(void (i8*)* bitcast (void (%"class.std::ios_base::Init"*)* @_ZNSt8ios_base4InitD1Ev to void (i8*)*), i8* getelementptr inbounds (%"class.std::ios_base::Init", %"class.std::ios_base::Init"* @_ZStL8__ioinit, i32 0, i32 0), i8* @__dso_handle) #1
+  %0 = call i32 @__cxa_atexit(void (i8*)* bitcast (void (%"class.std::ios_base::Init"*)* @_ZNSt8ios_base4InitD1Ev to void (i8*)*), i8* getelementptr inbounds (%"class.std::ios_base::Init", %"class.std::ios_base::Init"* @_ZStL8__ioinit, i32 0, i32 0), i8* @__dso_handle)
   ret void
 }
 
-declare void @_ZNSt8ios_base4InitC1Ev(%"class.std::ios_base::Init"*) #0
+declare void @_ZNSt8ios_base4InitC1Ev(%"class.std::ios_base::Init"*)
 
-declare void @_ZNSt8ios_base4InitD1Ev(%"class.std::ios_base::Init"*) #0
+declare void @_ZNSt8ios_base4InitD1Ev(%"class.std::ios_base::Init"*)
 
 ; Function Attrs: nounwind
-declare i32 @__cxa_atexit(void (i8*)*, i8*, i8*) #1
+declare i32 @__cxa_atexit(void (i8*)*, i8*, i8*)
 
 ; Function Attrs: uwtable
-define void @test() #2 {
+define void @test() {
 entry:
   %vtable = load i8*, i8** bitcast (%"class.std::basic_ostream"* @_ZSt4cout to i8**)
   %vbase.offset.ptr = getelementptr i8, i8* %vtable, i64 -24
@@ -51,18 +48,11 @@ entry:
   ret void
 }
 
-declare signext i8 @_ZNSt9basic_iosIcSt11char_traitsIcEE4fillEc(%"class.std::basic_ios"*, i8 signext) #0
+declare signext i8 @_ZNSt9basic_iosIcSt11char_traitsIcEE4fillEc(%"class.std::basic_ios"*, i8 signext)
 
-define internal void @_GLOBAL__sub_I_test12.cpp() #0 section ".text.startup" {
+define internal void @_GLOBAL__sub_I_test12.cpp() section ".text.startup" {
 entry:
   call void @__cxx_global_var_init()
   ret void
 }
 
-attributes #0 = { "disable-tail-calls"="false" "less-precise-fpmad"="false" "no-frame-pointer-elim"="true" "no-frame-pointer-elim-non-leaf" "no-infs-fp-math"="false" "no-nans-fp-math"="false" "stack-protector-buffer-size"="8" "target-cpu"="x86-64" "target-features"="+sse,+sse2" "unsafe-fp-math"="false" "use-soft-float"="false" }
-attributes #1 = { nounwind }
-attributes #2 = { uwtable "disable-tail-calls"="false" "less-precise-fpmad"="false" "no-frame-pointer-elim"="true" "no-frame-pointer-elim-non-leaf" "no-infs-fp-math"="false" "no-nans-fp-math"="false" "stack-protector-buffer-size"="8" "target-cpu"="x86-64" "target-features"="+sse,+sse2" "unsafe-fp-math"="false" "use-soft-float"="false" }
-
-!llvm.ident = !{!0}
-
-!0 = !{!"clang version 3.7.1 (http://llvm.org/git/clang.git 0dbefa1b83eb90f7a06b5df5df254ce32be3db4b) (http://llvm.org/git/llvm.git 33c352b3eda89abc24e7511d9045fa2e499a42e3)"}

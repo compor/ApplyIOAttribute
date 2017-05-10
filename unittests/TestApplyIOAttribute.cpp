@@ -230,5 +230,14 @@ TEST_F(TestApplyIOAttribute, CxxIOFuncExists2) {
   ExpectTestPass(trm);
 }
 
+TEST_F(TestApplyIOAttribute, IgnoreCxxNonIOFuncExists) {
+  ParseAssembly("test12.ll");
+
+  test_result_map trm;
+
+  trm.insert({"has IO call", false});
+  ExpectTestPass(trm);
+}
+
 } // namespace anonymous end
 } // namespace icsa end

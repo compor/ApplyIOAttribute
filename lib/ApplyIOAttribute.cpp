@@ -82,7 +82,7 @@ bool ApplyIOAttribute::hasCIO(const llvm::Function &Func) const {
   llvm::LibFunc::Func TLIFunc;
 
   if (m_TLI.getLibFunc(funcName, TLIFunc) && m_TLI.has(TLIFunc) &&
-      IOLibFuncs.end() != IOLibFuncs.find(TLIFunc)) {
+      m_IOLibFuncs.end() != m_IOLibFuncs.find(TLIFunc)) {
     return true;
   }
 
@@ -124,11 +124,11 @@ bool ApplyIOAttribute::hasCxxIO(const llvm::Function &Func) const {
 
   const auto &funcName = demangleCxxName(Func.getName().data());
   const auto &found1 = std::find_if(
-      std::begin(CxxIOFuncs), std::end(CxxIOFuncs), [&funcName](const auto &e) {
+      std::begin(m_CxxIOFuncs), std::end(m_CxxIOFuncs), [&funcName](const auto &e) {
         return std::string::npos != funcName.find(e);
       });
 
-  if (found1 == std::end(CxxIOFuncs))
+  if (found1 == std::end(m_CxxIOFuncs))
     return false;
 
   const auto *classType = getClassFromMethod(*Func.getFunctionType());
@@ -137,12 +137,12 @@ bool ApplyIOAttribute::hasCxxIO(const llvm::Function &Func) const {
 
   const auto &classTypeName = classType->getStructName();
   const auto &found2 =
-      std::find_if(std::begin(CxxIOTypes), std::end(CxxIOTypes),
+      std::find_if(std::begin(m_CxxIOTypes), std::end(m_CxxIOTypes),
                    [&classTypeName](const auto &e) {
                      return llvm::StringRef::npos != classTypeName.find(e);
                    });
 
-  if (found2 == std::end(CxxIOTypes))
+  if (found2 == std::end(m_CxxIOTypes))
     return false;
 
   return true;
@@ -167,131 +167,131 @@ ApplyIOAttribute::getCalledFunction(const llvm::Instruction &Inst) const {
   return const_cast<llvm::Function *>(calledFunc);
 }
 
-void ApplyIOAttribute::setupIOFuncs() {
+void ApplyIOAttribute::setupLibCIOFuncs() {
   // TODO what about calls that might have other side-effects
   // system()
   // getenv()
   // setenv()
   // unsetenv()
-  IOLibFuncs.insert(llvm::LibFunc::under_IO_getc);
-  IOLibFuncs.insert(llvm::LibFunc::under_IO_putc);
-  IOLibFuncs.insert(llvm::LibFunc::dunder_isoc99_scanf);
-  IOLibFuncs.insert(llvm::LibFunc::access);
-  IOLibFuncs.insert(llvm::LibFunc::chmod);
-  IOLibFuncs.insert(llvm::LibFunc::chown);
-  IOLibFuncs.insert(llvm::LibFunc::closedir);
-  IOLibFuncs.insert(llvm::LibFunc::fclose);
-  IOLibFuncs.insert(llvm::LibFunc::fdopen);
-  IOLibFuncs.insert(llvm::LibFunc::feof);
-  IOLibFuncs.insert(llvm::LibFunc::ferror);
-  IOLibFuncs.insert(llvm::LibFunc::fflush);
-  IOLibFuncs.insert(llvm::LibFunc::fgetc);
-  IOLibFuncs.insert(llvm::LibFunc::fgetpos);
-  IOLibFuncs.insert(llvm::LibFunc::fgets);
-  IOLibFuncs.insert(llvm::LibFunc::fileno);
-  IOLibFuncs.insert(llvm::LibFunc::fiprintf);
-  IOLibFuncs.insert(llvm::LibFunc::flockfile);
-  IOLibFuncs.insert(llvm::LibFunc::fopen);
-  IOLibFuncs.insert(llvm::LibFunc::fopen64);
-  IOLibFuncs.insert(llvm::LibFunc::fprintf);
-  IOLibFuncs.insert(llvm::LibFunc::fputc);
-  IOLibFuncs.insert(llvm::LibFunc::fputs);
-  IOLibFuncs.insert(llvm::LibFunc::fread);
-  IOLibFuncs.insert(llvm::LibFunc::fscanf);
-  IOLibFuncs.insert(llvm::LibFunc::fseek);
-  IOLibFuncs.insert(llvm::LibFunc::fseeko);
-  IOLibFuncs.insert(llvm::LibFunc::fseeko64);
-  IOLibFuncs.insert(llvm::LibFunc::fsetpos);
-  IOLibFuncs.insert(llvm::LibFunc::fstatvfs);
-  IOLibFuncs.insert(llvm::LibFunc::fstatvfs64);
-  IOLibFuncs.insert(llvm::LibFunc::ftell);
-  IOLibFuncs.insert(llvm::LibFunc::ftello);
-  IOLibFuncs.insert(llvm::LibFunc::ftello64);
-  IOLibFuncs.insert(llvm::LibFunc::ftrylockfile);
-  IOLibFuncs.insert(llvm::LibFunc::funlockfile);
-  IOLibFuncs.insert(llvm::LibFunc::fwrite);
-  IOLibFuncs.insert(llvm::LibFunc::getc);
-  IOLibFuncs.insert(llvm::LibFunc::getc_unlocked);
-  IOLibFuncs.insert(llvm::LibFunc::getchar);
-  IOLibFuncs.insert(llvm::LibFunc::getlogin_r);
-  IOLibFuncs.insert(llvm::LibFunc::getpwnam);
-  IOLibFuncs.insert(llvm::LibFunc::gets);
-  IOLibFuncs.insert(llvm::LibFunc::iprintf);
-  IOLibFuncs.insert(llvm::LibFunc::lchown);
-  IOLibFuncs.insert(llvm::LibFunc::lstat);
-  IOLibFuncs.insert(llvm::LibFunc::lstat64);
-  IOLibFuncs.insert(llvm::LibFunc::mkdir);
-  IOLibFuncs.insert(llvm::LibFunc::open);
-  IOLibFuncs.insert(llvm::LibFunc::open64);
-  IOLibFuncs.insert(llvm::LibFunc::opendir);
-  IOLibFuncs.insert(llvm::LibFunc::pclose);
-  IOLibFuncs.insert(llvm::LibFunc::perror);
-  IOLibFuncs.insert(llvm::LibFunc::popen);
-  IOLibFuncs.insert(llvm::LibFunc::pread);
-  IOLibFuncs.insert(llvm::LibFunc::printf);
-  IOLibFuncs.insert(llvm::LibFunc::putc);
-  IOLibFuncs.insert(llvm::LibFunc::putchar);
-  IOLibFuncs.insert(llvm::LibFunc::puts);
-  IOLibFuncs.insert(llvm::LibFunc::pwrite);
-  IOLibFuncs.insert(llvm::LibFunc::read);
-  IOLibFuncs.insert(llvm::LibFunc::readlink);
-  IOLibFuncs.insert(llvm::LibFunc::realpath);
-  IOLibFuncs.insert(llvm::LibFunc::remove);
-  IOLibFuncs.insert(llvm::LibFunc::rename);
-  IOLibFuncs.insert(llvm::LibFunc::rewind);
-  IOLibFuncs.insert(llvm::LibFunc::rmdir);
-  IOLibFuncs.insert(llvm::LibFunc::scanf);
-  IOLibFuncs.insert(llvm::LibFunc::siprintf);
-  IOLibFuncs.insert(llvm::LibFunc::stat);
-  IOLibFuncs.insert(llvm::LibFunc::stat64);
-  IOLibFuncs.insert(llvm::LibFunc::statvfs);
-  IOLibFuncs.insert(llvm::LibFunc::statvfs64);
-  IOLibFuncs.insert(llvm::LibFunc::tmpfile);
-  IOLibFuncs.insert(llvm::LibFunc::tmpfile64);
-  IOLibFuncs.insert(llvm::LibFunc::ungetc);
-  IOLibFuncs.insert(llvm::LibFunc::unlink);
-  IOLibFuncs.insert(llvm::LibFunc::vfprintf);
-  IOLibFuncs.insert(llvm::LibFunc::vfscanf);
-  IOLibFuncs.insert(llvm::LibFunc::vprintf);
-  IOLibFuncs.insert(llvm::LibFunc::vscanf);
-  IOLibFuncs.insert(llvm::LibFunc::vsnprintf);
-  IOLibFuncs.insert(llvm::LibFunc::vsscanf);
-  IOLibFuncs.insert(llvm::LibFunc::write);
+  m_IOLibFuncs.insert(llvm::LibFunc::under_IO_getc);
+  m_IOLibFuncs.insert(llvm::LibFunc::under_IO_putc);
+  m_IOLibFuncs.insert(llvm::LibFunc::dunder_isoc99_scanf);
+  m_IOLibFuncs.insert(llvm::LibFunc::access);
+  m_IOLibFuncs.insert(llvm::LibFunc::chmod);
+  m_IOLibFuncs.insert(llvm::LibFunc::chown);
+  m_IOLibFuncs.insert(llvm::LibFunc::closedir);
+  m_IOLibFuncs.insert(llvm::LibFunc::fclose);
+  m_IOLibFuncs.insert(llvm::LibFunc::fdopen);
+  m_IOLibFuncs.insert(llvm::LibFunc::feof);
+  m_IOLibFuncs.insert(llvm::LibFunc::ferror);
+  m_IOLibFuncs.insert(llvm::LibFunc::fflush);
+  m_IOLibFuncs.insert(llvm::LibFunc::fgetc);
+  m_IOLibFuncs.insert(llvm::LibFunc::fgetpos);
+  m_IOLibFuncs.insert(llvm::LibFunc::fgets);
+  m_IOLibFuncs.insert(llvm::LibFunc::fileno);
+  m_IOLibFuncs.insert(llvm::LibFunc::fiprintf);
+  m_IOLibFuncs.insert(llvm::LibFunc::flockfile);
+  m_IOLibFuncs.insert(llvm::LibFunc::fopen);
+  m_IOLibFuncs.insert(llvm::LibFunc::fopen64);
+  m_IOLibFuncs.insert(llvm::LibFunc::fprintf);
+  m_IOLibFuncs.insert(llvm::LibFunc::fputc);
+  m_IOLibFuncs.insert(llvm::LibFunc::fputs);
+  m_IOLibFuncs.insert(llvm::LibFunc::fread);
+  m_IOLibFuncs.insert(llvm::LibFunc::fscanf);
+  m_IOLibFuncs.insert(llvm::LibFunc::fseek);
+  m_IOLibFuncs.insert(llvm::LibFunc::fseeko);
+  m_IOLibFuncs.insert(llvm::LibFunc::fseeko64);
+  m_IOLibFuncs.insert(llvm::LibFunc::fsetpos);
+  m_IOLibFuncs.insert(llvm::LibFunc::fstatvfs);
+  m_IOLibFuncs.insert(llvm::LibFunc::fstatvfs64);
+  m_IOLibFuncs.insert(llvm::LibFunc::ftell);
+  m_IOLibFuncs.insert(llvm::LibFunc::ftello);
+  m_IOLibFuncs.insert(llvm::LibFunc::ftello64);
+  m_IOLibFuncs.insert(llvm::LibFunc::ftrylockfile);
+  m_IOLibFuncs.insert(llvm::LibFunc::funlockfile);
+  m_IOLibFuncs.insert(llvm::LibFunc::fwrite);
+  m_IOLibFuncs.insert(llvm::LibFunc::getc);
+  m_IOLibFuncs.insert(llvm::LibFunc::getc_unlocked);
+  m_IOLibFuncs.insert(llvm::LibFunc::getchar);
+  m_IOLibFuncs.insert(llvm::LibFunc::getlogin_r);
+  m_IOLibFuncs.insert(llvm::LibFunc::getpwnam);
+  m_IOLibFuncs.insert(llvm::LibFunc::gets);
+  m_IOLibFuncs.insert(llvm::LibFunc::iprintf);
+  m_IOLibFuncs.insert(llvm::LibFunc::lchown);
+  m_IOLibFuncs.insert(llvm::LibFunc::lstat);
+  m_IOLibFuncs.insert(llvm::LibFunc::lstat64);
+  m_IOLibFuncs.insert(llvm::LibFunc::mkdir);
+  m_IOLibFuncs.insert(llvm::LibFunc::open);
+  m_IOLibFuncs.insert(llvm::LibFunc::open64);
+  m_IOLibFuncs.insert(llvm::LibFunc::opendir);
+  m_IOLibFuncs.insert(llvm::LibFunc::pclose);
+  m_IOLibFuncs.insert(llvm::LibFunc::perror);
+  m_IOLibFuncs.insert(llvm::LibFunc::popen);
+  m_IOLibFuncs.insert(llvm::LibFunc::pread);
+  m_IOLibFuncs.insert(llvm::LibFunc::printf);
+  m_IOLibFuncs.insert(llvm::LibFunc::putc);
+  m_IOLibFuncs.insert(llvm::LibFunc::putchar);
+  m_IOLibFuncs.insert(llvm::LibFunc::puts);
+  m_IOLibFuncs.insert(llvm::LibFunc::pwrite);
+  m_IOLibFuncs.insert(llvm::LibFunc::read);
+  m_IOLibFuncs.insert(llvm::LibFunc::readlink);
+  m_IOLibFuncs.insert(llvm::LibFunc::realpath);
+  m_IOLibFuncs.insert(llvm::LibFunc::remove);
+  m_IOLibFuncs.insert(llvm::LibFunc::rename);
+  m_IOLibFuncs.insert(llvm::LibFunc::rewind);
+  m_IOLibFuncs.insert(llvm::LibFunc::rmdir);
+  m_IOLibFuncs.insert(llvm::LibFunc::scanf);
+  m_IOLibFuncs.insert(llvm::LibFunc::siprintf);
+  m_IOLibFuncs.insert(llvm::LibFunc::stat);
+  m_IOLibFuncs.insert(llvm::LibFunc::stat64);
+  m_IOLibFuncs.insert(llvm::LibFunc::statvfs);
+  m_IOLibFuncs.insert(llvm::LibFunc::statvfs64);
+  m_IOLibFuncs.insert(llvm::LibFunc::tmpfile);
+  m_IOLibFuncs.insert(llvm::LibFunc::tmpfile64);
+  m_IOLibFuncs.insert(llvm::LibFunc::ungetc);
+  m_IOLibFuncs.insert(llvm::LibFunc::unlink);
+  m_IOLibFuncs.insert(llvm::LibFunc::vfprintf);
+  m_IOLibFuncs.insert(llvm::LibFunc::vfscanf);
+  m_IOLibFuncs.insert(llvm::LibFunc::vprintf);
+  m_IOLibFuncs.insert(llvm::LibFunc::vscanf);
+  m_IOLibFuncs.insert(llvm::LibFunc::vsnprintf);
+  m_IOLibFuncs.insert(llvm::LibFunc::vsscanf);
+  m_IOLibFuncs.insert(llvm::LibFunc::write);
 
   return;
 }
 
 void ApplyIOAttribute::setupCxxIOFuncs() {
-  CxxIOFuncs.push_back("put");
-  CxxIOFuncs.push_back("write");
-  CxxIOFuncs.push_back("flush");
-  CxxIOFuncs.push_back("get");
-  CxxIOFuncs.push_back("peek");
-  CxxIOFuncs.push_back("unget");
-  CxxIOFuncs.push_back("putback");
-  CxxIOFuncs.push_back("getline");
-  CxxIOFuncs.push_back("ignore");
-  CxxIOFuncs.push_back("readsome");
-  CxxIOFuncs.push_back("sync");
-  CxxIOFuncs.push_back("open");
-  CxxIOFuncs.push_back("close");
-  CxxIOFuncs.push_back("operator<<");
-  CxxIOFuncs.push_back("operator>>");
+  m_CxxIOFuncs.push_back("put");
+  m_CxxIOFuncs.push_back("write");
+  m_CxxIOFuncs.push_back("flush");
+  m_CxxIOFuncs.push_back("get");
+  m_CxxIOFuncs.push_back("peek");
+  m_CxxIOFuncs.push_back("unget");
+  m_CxxIOFuncs.push_back("putback");
+  m_CxxIOFuncs.push_back("getline");
+  m_CxxIOFuncs.push_back("ignore");
+  m_CxxIOFuncs.push_back("readsome");
+  m_CxxIOFuncs.push_back("sync");
+  m_CxxIOFuncs.push_back("open");
+  m_CxxIOFuncs.push_back("close");
+  m_CxxIOFuncs.push_back("operator<<");
+  m_CxxIOFuncs.push_back("operator>>");
 
   // ctors
-  CxxIOFuncs.push_back("basic_ostream");
-  CxxIOFuncs.push_back("basic_istream");
-  CxxIOFuncs.push_back("basic_iostream");
-  CxxIOFuncs.push_back("basic_ofstream");
-  CxxIOFuncs.push_back("basic_istream");
-  CxxIOFuncs.push_back("basic_fstream");
+  m_CxxIOFuncs.push_back("basic_ostream");
+  m_CxxIOFuncs.push_back("basic_istream");
+  m_CxxIOFuncs.push_back("basic_iostream");
+  m_CxxIOFuncs.push_back("basic_ofstream");
+  m_CxxIOFuncs.push_back("basic_istream");
+  m_CxxIOFuncs.push_back("basic_fstream");
 
-  CxxIOTypes.push_back("basic_ostream");
-  CxxIOTypes.push_back("basic_istream");
-  CxxIOTypes.push_back("basic_iostream");
-  CxxIOTypes.push_back("basic_ofstream");
-  CxxIOTypes.push_back("basic_istream");
-  CxxIOTypes.push_back("basic_fstream");
+  m_CxxIOTypes.push_back("basic_ostream");
+  m_CxxIOTypes.push_back("basic_istream");
+  m_CxxIOTypes.push_back("basic_iostream");
+  m_CxxIOTypes.push_back("basic_ofstream");
+  m_CxxIOTypes.push_back("basic_istream");
+  m_CxxIOTypes.push_back("basic_fstream");
 }
 
 } // namespace icsa end

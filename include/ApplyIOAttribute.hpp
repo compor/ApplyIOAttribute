@@ -27,16 +27,14 @@ public:
   ApplyIOAttribute(const llvm::TargetLibraryInfo &TLI,
                    llvm::StringRef IOAttr = "icsa-io")
       : m_IOAttr{IOAttr}, m_TLI{TLI} {
-    setupIOFuncs();
+    setupLibCIOFuncs();
     setupCxxIOFuncs();
 
     return;
   }
 
   bool hasIO(const llvm::Function &Func) const;
-
   bool apply(llvm::Function &func) const;
-
   inline llvm::StringRef getIOAttr() const { return m_IOAttr; }
 
 private:
@@ -47,14 +45,14 @@ private:
   llvm::Type *getClassFromMethod(const llvm::FunctionType &FuncType) const;
   std::string demangleCxxName(const char *name) const;
 
-  void setupIOFuncs();
+  void setupLibCIOFuncs();
   void setupCxxIOFuncs();
 
   const llvm::TargetLibraryInfo &m_TLI;
-  std::set<llvm::LibFunc::Func> IOLibFuncs;
+  std::set<llvm::LibFunc::Func> m_IOLibFuncs;
 
-  std::vector<std::string> CxxIOFuncs;
-  std::vector<std::string> CxxIOTypes;
+  std::vector<std::string> m_CxxIOFuncs;
+  std::vector<std::string> m_CxxIOTypes;
 
   const llvm::StringRef m_IOAttr;
 };

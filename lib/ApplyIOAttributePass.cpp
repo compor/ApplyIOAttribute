@@ -50,6 +50,9 @@
 #include <string>
 // using std::string
 
+#include <fstream>
+// using std::ifstream
+
 #include <system_error>
 // using std::error_code
 

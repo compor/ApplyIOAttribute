@@ -307,6 +307,14 @@ private:
     CxxIOFuncs.push_back("operator<<");
     CxxIOFuncs.push_back("operator>>");
 
+    // ctors
+    CxxIOFuncs.push_back("basic_ostream");
+    CxxIOFuncs.push_back("basic_istream");
+    CxxIOFuncs.push_back("basic_iostream");
+    CxxIOFuncs.push_back("basic_ofstream");
+    CxxIOFuncs.push_back("basic_istream");
+    CxxIOFuncs.push_back("basic_fstream");
+
     CxxIOTypes.push_back("basic_ostream");
     CxxIOTypes.push_back("basic_istream");
     CxxIOTypes.push_back("basic_iostream");

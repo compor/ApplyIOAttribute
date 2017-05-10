@@ -45,8 +45,14 @@
 #include <cstdlib>
 // using std::free
 
+#include <algorithm>
+// using std::find_if
+
 #include <memory>
 // using std::unique_ptr
+
+#include <string>
+// using std::string
 
 #include <vector>
 // using std::vector
@@ -102,28 +108,28 @@ public:
     return false;
   }
 
-  bool hasCxxIO(const llvm::Function &Func) const {
-    if (Func.getFunctionType()->getNumParams() < 1)
-      return false;
-
-    if (!Func.hasName())
-      return false;
-
-    const auto &funcName = Func.getName();
+  std::string demangleCxxName(const char *name) const {
+    std::string demangledName{""};
     auto status = 0;
 
-    const auto &demangledName = malloc_unique_ptr<char>(
-        abi::__cxa_demangle(funcName.data(), 0, 0, &status));
+    const auto &demangledNamePtr =
+        malloc_unique_ptr<char>(abi::__cxa_demangle(name, 0, 0, &status));
 
-    if (status)
+    if (!status)
+      demangledName = demangledNamePtr.get();
+
+    return demangledName;
+  }
+
+  bool hasCxxIO(const llvm::Function &Func) const {
+    if (Func.getFunctionType()->getNumParams() < 1 || !Func.hasName())
       return false;
 
-    std::string demangledNameStr(demangledName.get());
-
+    const auto &funcName = demangleCxxName(Func.getName().data());
     const auto &found1 =
         std::find_if(std::begin(CxxIOFuncs), std::end(CxxIOFuncs),
-                     [demangledNameStr](const auto &e) {
-                       return std::string::npos != demangledNameStr.find(e);
+                     [funcName](const auto &e) {
+                       return std::string::npos != funcName.find(e);
                      });
 
     if (found1 == std::end(CxxIOFuncs))

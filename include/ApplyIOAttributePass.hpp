@@ -79,7 +79,9 @@ namespace icsa {
 
 class ApplyIOAttribute {
 public:
-  ApplyIOAttribute(const llvm::TargetLibraryInfo &TLI) : m_TLI{TLI} {
+  ApplyIOAttribute(const llvm::TargetLibraryInfo &TLI,
+                   llvm::StringRef IOAttr = "icsa-io")
+      : m_IOAttr{IOAttr}, m_TLI{TLI} {
     setupIOFuncs();
     setupCxxIOFuncs();
 
@@ -98,10 +100,12 @@ public:
   }
 
   bool apply(llvm::Function &func) const {
-    func.addFnAttr("icsa-io");
+    func.addFnAttr(this->getIOAttr());
 
     return true;
   }
+
+  llvm::StringRef getIOAttr() const { return m_IOAttr; }
 
 private:
   bool hasCIO(const llvm::Function &Func) const {
@@ -328,6 +332,8 @@ private:
 
   std::vector<std::string> CxxIOFuncs;
   std::vector<std::string> CxxIOTypes;
+
+  const llvm::StringRef m_IOAttr;
 };
 
 class ApplyIOAttributePass : public llvm::ModulePass {

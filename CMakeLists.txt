@@ -63,7 +63,9 @@ msg(STATUS "EH support: ${LLVM_ENABLE_EH}")
 #
 
 set(LIB_NAME "LLVMApplyIOAttributePass")
-set(LIB_SOURCES "lib/ApplyIOAttributePass.cpp")
+set(LIB_SOURCES 
+  "lib/ApplyIOAttribute.cpp"
+  "lib/ApplyIOAttributePass.cpp")
 
 if(NOT PRJ_USE_LLVM_INTERNAL_MODULE)
   add_library(${LIB_NAME} MODULE ${LIB_SOURCES})

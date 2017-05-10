@@ -53,6 +53,8 @@
 #include <system_error>
 // using std::error_code
 
+#include "BWList.hpp"
+
 #include "ApplyIOAttributePass.hpp"
 
 #ifndef NDEBUG

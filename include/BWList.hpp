@@ -44,15 +44,15 @@ public:
     return true;
   }
 
-  bool match(const char *target) {
-    return ListMode::DISJUNCTIVE == m_Mode ? match_any(target)
-                                           : match_all(target);
+  bool matches(const char *target) {
+    return ListMode::DISJUNCTIVE == m_Mode ? matches_any(target)
+                                           : matches_all(target);
   }
 
-  bool match(const std::string &target) { return match(target.c_str()); }
+  bool matches(const std::string &target) { return matches(target.c_str()); }
 
 private:
-  bool match_any(const char *target) {
+  bool matches_any(const char *target) {
     std::cmatch match;
 
     for (const auto &pat : m_Patterns)
@@ -62,7 +62,7 @@ private:
     return false;
   }
 
-  bool match_all(const char *target) {
+  bool matches_all(const char *target) {
     std::cmatch match;
 
     for (const auto &pat : m_Patterns)

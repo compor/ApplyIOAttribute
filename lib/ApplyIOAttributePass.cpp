@@ -105,6 +105,10 @@ static llvm::cl::opt<std::string>
     ReportStats("aioattr-stats",
                 llvm::cl::desc("apply IO attribute stats report filename"));
 
+static llvm::cl::opt<std::string>
+    FuncWhileListFilename("aioattr-fn-whitelist",
+                          llvm::cl::desc("function whitelist"));
+
 namespace icsa {
 
 static long NumAttributeApplications = 0;
@@ -122,7 +126,22 @@ bool ApplyIOAttributePass::runOnModule(llvm::Module &M) {
   const auto &TLI = getAnalysis<llvm::TargetLibraryInfoWrapperPass>().getTLI();
   ApplyIOAttribute aioattr(TLI);
 
-  for (auto &func : M)
+  BWList funcWhileList;
+  if (!FuncWhileListFilename.empty()) {
+    std::ifstream funcWhiteListFile{FuncWhileListFilename};
+
+    if (funcWhiteListFile.is_open()) {
+      funcWhileList.addRegex(funcWhiteListFile);
+      funcWhiteListFile.close();
+    } else
+      PLUGIN_ERR << "could open file: \'" << FuncWhileListFilename << "\'\n";
+  }
+
+  for (auto &func : M) {
+    if (!FuncWhileListFilename.empty() &&
+        !funcWhileList.matches(func.getName().data()))
+      continue;
+
     if (!func.isDeclaration() && !func.hasFnAttribute(aioattr.getIOAttr()) &&
         aioattr.hasIO(func)) {
       hasChanged |= aioattr.apply(func);
@@ -132,6 +151,7 @@ bool ApplyIOAttributePass::runOnModule(llvm::Module &M) {
         FunctionsAltered.insert(func.getName());
       }
     }
+  }
 
   if (!ReportStats.empty()) {
     std::error_code err;

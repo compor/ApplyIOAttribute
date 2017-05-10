@@ -97,6 +97,13 @@ public:
     return false;
   }
 
+  bool apply(llvm::Function &func) const {
+    func.addFnAttr("icsa-io");
+
+    return true;
+  }
+
+private:
   bool hasCIO(const llvm::Function &Func) const {
     if (!Func.hasName())
       return false;
@@ -171,13 +178,6 @@ public:
     return true;
   }
 
-  bool apply(llvm::Function &func) const {
-    func.addFnAttr("icsa-io");
-
-    return true;
-  }
-
-private:
   llvm::Function *getCalledFunction(const llvm::Instruction &Inst) const {
     if (llvm::isa<llvm::IntrinsicInst>(Inst))
       return nullptr;

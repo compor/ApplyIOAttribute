@@ -64,7 +64,9 @@ namespace llvm {
 class Module;
 } // namespace llvm end
 
-namespace icsa {
+template <typename T> struct rm_const_ptr { using type = T; };
+template <typename T> struct rm_const_ptr<const T *> { using type = T *; };
+template <typename T> using rm_const_ptr_t = typename rm_const_ptr<T>::type;
 
 struct malloc_deleter {
   template <typename T> void operator()(T *ptr) const { std::free(ptr); }
@@ -72,6 +74,8 @@ struct malloc_deleter {
 
 template <typename T>
 using malloc_unique_ptr = std::unique_ptr<T, malloc_deleter>;
+
+namespace icsa {
 
 class ApplyIOAttribute {
 public:
@@ -121,6 +125,21 @@ public:
     return demangledName;
   }
 
+  llvm::Type *getClassFromMethod(const llvm::FunctionType &FuncType) const {
+    const auto *potentialClassTypePtr = FuncType.getParamType(0);
+    if (!potentialClassTypePtr->isPointerTy())
+      return nullptr;
+
+    const auto *classType =
+        llvm::dyn_cast<llvm::PointerType>(potentialClassTypePtr)
+            ->getElementType();
+
+    if (!classType->isStructTy())
+      return nullptr;
+
+    return rm_const_ptr_t<decltype(classType)>(classType);
+  }
+
   bool hasCxxIO(const llvm::Function &Func) const {
     if (Func.getFunctionType()->getNumParams() < 1 || !Func.hasName())
       return false;
@@ -128,31 +147,23 @@ public:
     const auto &funcName = demangleCxxName(Func.getName().data());
     const auto &found1 =
         std::find_if(std::begin(CxxIOFuncs), std::end(CxxIOFuncs),
-                     [funcName](const auto &e) {
+                     [&funcName](const auto &e) {
                        return std::string::npos != funcName.find(e);
                      });
 
     if (found1 == std::end(CxxIOFuncs))
       return false;
 
-    const auto *potentialClassTypePtr = Func.getFunctionType()->getParamType(0);
-    if (!potentialClassTypePtr->isPointerTy())
+    const auto *classType = getClassFromMethod(*Func.getFunctionType());
+    if (!classType)
       return false;
 
-    const auto *potentialClassType =
-        llvm::dyn_cast<llvm::PointerType>(potentialClassTypePtr)
-            ->getElementType();
-
-    if (!potentialClassType->isStructTy())
-      return false;
-
-    const auto &potentialClassTypeName = potentialClassType->getStructName();
-
-    const auto &found2 = std::find_if(
-        std::begin(CxxIOTypes), std::end(CxxIOTypes),
-        [potentialClassTypeName](const auto &e) {
-          return llvm::StringRef::npos != potentialClassTypeName.find(e);
-        });
+    const auto &classTypeName = classType->getStructName();
+    const auto &found2 =
+        std::find_if(std::begin(CxxIOTypes), std::end(CxxIOTypes),
+                     [&classTypeName](const auto &e) {
+                       return llvm::StringRef::npos != classTypeName.find(e);
+                     });
 
     if (found2 == std::end(CxxIOTypes))
       return false;

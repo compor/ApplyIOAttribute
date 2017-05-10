@@ -48,6 +48,9 @@
 #include <memory>
 // using std::unique_ptr
 
+#include <vector>
+// using std::vector
+
 #include <set>
 // using std::set
 
@@ -68,6 +71,7 @@ class ApplyIOAttribute {
 public:
   ApplyIOAttribute(const llvm::TargetLibraryInfo &TLI) : m_TLI{TLI} {
     setupIOFuncs();
+    setupCxxIOFuncs();
 
     return;
   }
@@ -77,7 +81,7 @@ public:
       for (const auto &inst : bb) {
         const auto *calledFunc = getCalledFunction(inst);
         if (calledFunc)
-          return hasCIO(*calledFunc);
+          return hasCIO(*calledFunc) || hasCxxIO(*calledFunc);
       }
 
     return false;
@@ -114,7 +118,15 @@ public:
     if (status)
       return false;
 
-    if (std::end(CxxIOFuncs) == CxxIOFuncs.find(demangledName.get()))
+    std::string demangledNameStr(demangledName.get());
+
+    const auto &found1 =
+        std::find_if(std::begin(CxxIOFuncs), std::end(CxxIOFuncs),
+                     [demangledNameStr](const auto &e) {
+                       return std::string::npos != demangledNameStr.find(e);
+                     });
+
+    if (found1 == std::end(CxxIOFuncs))
       return false;
 
     const auto *potentialClassTypePtr = Func.getFunctionType()->getParamType(0);
@@ -130,7 +142,13 @@ public:
 
     const auto &potentialClassTypeName = potentialClassType->getStructName();
 
-    if (std::end(CxxIOTypes) == CxxIOTypes.find(potentialClassTypeName.data()))
+    const auto &found2 = std::find_if(
+        std::begin(CxxIOTypes), std::end(CxxIOTypes),
+        [potentialClassTypeName](const auto &e) {
+          return llvm::StringRef::npos != potentialClassTypeName.find(e);
+        });
+
+    if (found2 == std::end(CxxIOTypes))
       return false;
 
     return true;
@@ -256,35 +274,35 @@ private:
   }
 
   void setupCxxIOFuncs() {
-    CxxIOFuncs.insert("put");
-    CxxIOFuncs.insert("write");
-    CxxIOFuncs.insert("flush");
-    CxxIOFuncs.insert("get");
-    CxxIOFuncs.insert("peek");
-    CxxIOFuncs.insert("unget");
-    CxxIOFuncs.insert("putback");
-    CxxIOFuncs.insert("getline");
-    CxxIOFuncs.insert("ignore");
-    CxxIOFuncs.insert("readsome");
-    CxxIOFuncs.insert("sync");
-    CxxIOFuncs.insert("open");
-    CxxIOFuncs.insert("close");
-    CxxIOFuncs.insert("operator<<");
-    CxxIOFuncs.insert("operator>>");
+    CxxIOFuncs.push_back("put");
+    CxxIOFuncs.push_back("write");
+    CxxIOFuncs.push_back("flush");
+    CxxIOFuncs.push_back("get");
+    CxxIOFuncs.push_back("peek");
+    CxxIOFuncs.push_back("unget");
+    CxxIOFuncs.push_back("putback");
+    CxxIOFuncs.push_back("getline");
+    CxxIOFuncs.push_back("ignore");
+    CxxIOFuncs.push_back("readsome");
+    CxxIOFuncs.push_back("sync");
+    CxxIOFuncs.push_back("open");
+    CxxIOFuncs.push_back("close");
+    CxxIOFuncs.push_back("operator<<");
+    CxxIOFuncs.push_back("operator>>");
 
-    CxxIOTypes.insert("basic_ostream");
-    CxxIOTypes.insert("basic_istream");
-    CxxIOTypes.insert("basic_iostream");
-    CxxIOTypes.insert("basic_ofstream");
-    CxxIOTypes.insert("basic_istream");
-    CxxIOTypes.insert("basic_fstream");
+    CxxIOTypes.push_back("basic_ostream");
+    CxxIOTypes.push_back("basic_istream");
+    CxxIOTypes.push_back("basic_iostream");
+    CxxIOTypes.push_back("basic_ofstream");
+    CxxIOTypes.push_back("basic_istream");
+    CxxIOTypes.push_back("basic_fstream");
   }
 
   const llvm::TargetLibraryInfo &m_TLI;
   std::set<llvm::LibFunc::Func> IOLibFuncs;
 
-  std::set<std::string> CxxIOFuncs;
-  std::set<std::string> CxxIOTypes;
+  std::vector<std::string> CxxIOFuncs;
+  std::vector<std::string> CxxIOTypes;
 };
 
 class ApplyIOAttributePass : public llvm::ModulePass {

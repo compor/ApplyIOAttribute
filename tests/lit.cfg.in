@@ -17,9 +17,11 @@ config.suffixes = ['.ll', '.c', '.cpp', '.test', '.txt', '.s']
 # excludes: A list of directories to exclude from the testsuite. The 'Inputs'
 # subdirectories contain auxiliary inputs for various tests in their parent
 # directories.
-config.excludes = ['CMakeCache.txt', 'CMakeFiles', 'CMakeLists.txt']
+config.excludes = ['data', 'CMakeCache.txt', 'CMakeFiles', 'CMakeLists.txt']
 
 config.substitutions.append(('%bindir', "@CMAKE_BINARY_DIR@"))
+config.substitutions.append(('%inputdatadir', "%p/data/input"))
+config.substitutions.append(('%outputdatadir', "data/output"))
 config.substitutions.append(('%testeelib',
                              "@TESTEE_PREFIX@@TESTEE_LIB@@TESTEE_SUFFIX@"))
 

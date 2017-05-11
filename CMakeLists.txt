@@ -60,6 +60,31 @@ endif()
 msg(STATUS "EH support: ${LLVM_ENABLE_EH}")
 
 
+# when we are building the project as standalone, we'd like to leave the install
+# RPATH empty so that potentially we can dynamically link against other
+# installed LLVM toolchains
+
+if(PRJ_STANDALONE_BUILD)
+  set(CMAKE_SKIP_BUILD_RPATH FALSE)
+  set(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE)
+  #set(CMAKE_INSTALL_RPATH ${LLVM_LIBRARY_DIRS})
+
+  if(CMAKE_VERSION VERSION_EQUAL "3.8.0" OR CMAKE_VERSION VERSION_GREATER "3.8.0")
+    set(CMAKE_BUILD_RPATH ${LLVM_LIBRARY_DIRS})
+  else()
+    # unfortunately this also sets the install RPATH for older cmake versions
+    #set(PRJ_LINKER_FLAGS "${PRJ_LINKER_FLAGS} -Wl,-rpath ${LLVM_LIBRARY_DIRS}")
+  endif()
+
+  set(PRJ_LINKER_FLAGS "${PRJ_LINKER_FLAGS} -Wl,--disable-new-dtags")
+
+  set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${PRJ_LINKER_FLAGS}")
+  set(CMAKE_SHARED_LINKER_FLAGS 
+    "${CMAKE_SHARED_LINKER_FLAGS} ${PRJ_LINKER_FLAGS}")
+  set(CMAKE_MODULE_LINKER_FLAGS 
+    "${CMAKE_MODULE_LINKER_FLAGS} ${PRJ_LINKER_FLAGS}")
+endif()
+
 #
 
 set(LIB_NAME "LLVM${PRJ_NAME}Pass")

@@ -138,7 +138,7 @@ endif()
 
 add_subdirectory(unittests)
 add_subdirectory(tests)
-add_subdirectory(docs)
+add_subdirectory(doc)
 
 
 attach_compilation_db_command(${LIB_NAME})

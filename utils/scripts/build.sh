@@ -8,15 +8,15 @@ INSTALL_DIR=""
 
 # set configuration vars
 
-if [ -z "$1" ]; then 
-  echo "error: source directory was not provided" 
+if [ -z "$1" ]; then
+  echo "error: source directory was not provided"
 
   exit 1
 fi
 
 SRC_DIR=$1
 
-if [ -z "$2" ]; then 
+if [ -z "$2" ]; then
   INSTALL_DIR="${SRC_DIR}/../install/"
 else
   INSTALL_DIR="$2"
@@ -31,7 +31,7 @@ echo "info: install dir: ${INSTALL_DIR}"
 echo ""
 
 
-LINKER_FLAGS="-Wl,-L$(llvm-config --libdir) -lc++ -lc++abi" 
+LINKER_FLAGS="-Wl,-L$(llvm-config --libdir) -lc++ -lc++abi"
 
 CC=clang CXX=clang++ \
   cmake \
@@ -44,6 +44,7 @@ CC=clang CXX=clang++ \
   -DCMAKE_MODULE_LINKER_FLAGS="${LINKER_FLAGS}" \
   -DCMAKE_INSTALL_PREFIX="${INSTALL_DIR}" \
   -DPRJ_USE_LLVM_INTERNAL_MODULE=OFF \
+  -DPRJ_SKIP_TESTS=OFF \
   -DBOOST_ROOT=${BOOST_ROOT} \
   -DGTEST_ROOT=${GTEST_ROOT} \
   "${SRC_DIR}"

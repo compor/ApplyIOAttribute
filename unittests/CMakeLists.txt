@@ -2,6 +2,13 @@
 
 # requirements
 
+if(PRJ_SKIP_TESTS)
+  message(WARNING "Testing is disabled; skipping unit tests")
+
+  return()
+endif()
+
+
 find_package(GTest)
 
 if(NOT GTEST_FOUND)

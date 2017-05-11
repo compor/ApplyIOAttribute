@@ -13,6 +13,8 @@
 
 #include <vector>
 
+#include <iostream>
+
 class BWList {
 public:
   enum class ListMode : int { CONJUNCTIVE, DISJUNCTIVE };
@@ -26,10 +28,8 @@ public:
       return false;
 
     std::string pattern;
-    while (!file) {
-      file >> pattern;
+    while (file >> pattern)
       addRegex(pattern);
-    }
 
     return file.eof() || file.good();
   }

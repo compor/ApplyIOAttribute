@@ -1,4 +1,4 @@
-; RUN: opt -load %bindir/${TESTEE_PREFIX}LLVM${PRJ_NAME}Pass${TESTEE_SUFFIX} -apply-io-attribute -S < %s | FileCheck %s
+; RUN: opt -load %bindir/%testeelib -apply-io-attribute -S < %s | FileCheck %s
 
 
 %"class.std::ios_base::Init" = type { i8 }

@@ -1,4 +1,4 @@
-; RUN: opt -load %bindir/${TESTEE_PREFIX}LLVM${PRJ_NAME}Pass${TESTEE_SUFFIX} -apply-io-attribute -S < %s | FileCheck %s
+; RUN: opt -load %bindir/%testeelib -apply-io-attribute -S < %s | FileCheck %s
 
 
 %struct._IO_FILE = type { i32, i8*, i8*, i8*, i8*, i8*, i8*, i8*, i8*, i8*, i8*, i8*, %struct._IO_marker*, %struct._IO_FILE*, i32, i32, i64, i16, i8, [1 x i8], i8*, i64, i8*, i8*, i8*, i8*, i64, i32, [20 x i8] }

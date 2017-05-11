@@ -62,7 +62,7 @@ msg(STATUS "EH support: ${LLVM_ENABLE_EH}")
 
 #
 
-set(LIB_NAME "LLVMApplyIOAttributePass")
+set(LIB_NAME "LLVM${PRJ_NAME}Pass")
 set(LIB_SOURCES 
   "lib/ApplyIOAttribute.cpp"
   "lib/ApplyIOAttributePass.cpp")

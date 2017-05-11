@@ -117,7 +117,10 @@ target_compile_definitions(${LIB_NAME} PUBLIC ${LLVM_DEFINITIONS})
 target_compile_definitions(${LIB_NAME} PUBLIC VERSION_STRING=${PRJ_VERSION})
 
 target_include_directories(${LIB_NAME} PUBLIC ${LLVM_INCLUDE_DIRS})
-target_include_directories(${LIB_NAME} PUBLIC "include")
+target_include_directories(${LIB_NAME} PUBLIC
+  $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/include>)
+target_include_directories(${LIB_NAME} PUBLIC
+  $<INSTALL_INTERFACE:${CMAKE_INSTALL_PREFIX}/include>)
 
 #
 
@@ -141,23 +144,11 @@ add_subdirectory(docs)
 attach_compilation_db_command(${LIB_NAME})
 
 
-#
-
-configure_file(
-  ${PRJ_CMAKE_MODULE_DIR}/ApplyIOAttributePassConfig.cmake.in
-  "share/${PRJ_NAME}/cmake/${PRJ_NAME}Config.cmake"
-  @ONLY)
-
-# TODO parse project version from vcs
-write_basic_package_version_file(
-  "share/${PRJ_NAME}/cmake/${PRJ_NAME}ConfigVersion.cmake"
-  VERSION "0.0.0"
-  COMPATIBILITY SameMajorVersion)
-
 # installation
 
 set(PRJ_INSTALL_INCLUDE_DIR "include")
 set(PRJ_INSTALL_SHARE_DIR "share")
+set(PRJ_CMAKE_CONFIG_FILE "config.cmake")
 
 if(NOT PRJ_STANDALONE_BUILD)
   set(PRJ_INSTALL_INCLUDE_DIR ${PRJ_NAME}${PRJ_INSTALL_INCLUDE_DIR})
@@ -165,11 +156,18 @@ if(NOT PRJ_STANDALONE_BUILD)
 endif()
 
 if(PRJ_STANDALONE_BUILD)
-  install(TARGETS ${LIB_NAME} LIBRARY DESTINATION "lib")
+  install(TARGETS ${LIB_NAME} EXPORT ${PRJ_NAME} LIBRARY DESTINATION "lib")
 endif()
 
-install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/include/" DESTINATION
-  ${PRJ_INSTALL_INCLUDE_DIR})
-install(DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/share/" DESTINATION 
-  ${PRJ_INSTALL_SHARE_DIR})
+configure_file(
+  "${CMAKE_CURRENT_SOURCE_DIR}/share/cmake/${PRJ_CMAKE_CONFIG_FILE}.in"
+  "${CMAKE_CURRENT_BINARY_DIR}/share/cmake/${PRJ_NAME}-${PRJ_CMAKE_CONFIG_FILE}"
+  @ONLY)
+
+install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/include/" 
+  DESTINATION ${PRJ_INSTALL_INCLUDE_DIR})
+install(DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/share/"
+  DESTINATION ${PRJ_INSTALL_SHARE_DIR})
+
+install(EXPORT ${PRJ_NAME} DESTINATION "${PRJ_INSTALL_SHARE_DIR}/cmake")
 

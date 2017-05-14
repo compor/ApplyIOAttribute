@@ -104,9 +104,9 @@ static llvm::RegisterStandardPasses
 
 //
 
-static llvm::cl::opt<std::string>
-    ReportStats("aioattr-stats",
-                llvm::cl::desc("apply IO attribute stats report filename"));
+static llvm::cl::opt<std::string> ReportStatsFilename(
+    "aioattr-stats",
+    llvm::cl::desc("apply IO attribute stats report filename"));
 
 static llvm::cl::opt<std::string>
     FuncWhileListFilename("aioattr-fn-whitelist",
@@ -114,9 +114,31 @@ static llvm::cl::opt<std::string>
 
 namespace icsa {
 
-static long NumFunctionsProcessed = 0;
-static long NumAttributeApplications = 0;
-static std::set<std::string> FunctionsAltered;
+namespace {
+
+long NumFunctionsProcessed = 0;
+long NumAttributeApplications = 0;
+std::set<std::string> FunctionsAltered;
+
+void ReportStats(const char *Filename) {
+  std::error_code err;
+  llvm::raw_fd_ostream report(Filename, err, llvm::sys::fs::F_Text);
+
+  if (err)
+    PLUGIN_ERR << "could not open file: \"" << ReportStatsFilename
+               << "\" reason: " << err.message() << "\n";
+  else {
+    report << NumFunctionsProcessed << "\n";
+    report << NumAttributeApplications << "\n";
+
+    for (const auto &name : FunctionsAltered)
+      report << name << "\n";
+
+    report.close();
+  }
+}
+
+} // namespace anonymous end
 
 void ApplyIOAttributePass::getAnalysisUsage(llvm::AnalysisUsage &AU) const {
   AU.addRequired<llvm::TargetLibraryInfoWrapperPass>();
@@ -126,7 +148,7 @@ void ApplyIOAttributePass::getAnalysisUsage(llvm::AnalysisUsage &AU) const {
 }
 
 bool ApplyIOAttributePass::runOnModule(llvm::Module &M) {
-  bool shouldReportStats = !ReportStats.empty();
+  bool shouldReportStats = !ReportStatsFilename.empty();
   bool hasChanged = false;
   const auto &TLI = getAnalysis<llvm::TargetLibraryInfoWrapperPass>().getTLI();
   ApplyIOAttribute aioattr(TLI);
@@ -163,23 +185,8 @@ bool ApplyIOAttributePass::runOnModule(llvm::Module &M) {
     }
   }
 
-  if (shouldReportStats) {
-    std::error_code err;
-    llvm::raw_fd_ostream report(ReportStats, err, llvm::sys::fs::F_Text);
-
-    if (err)
-      PLUGIN_ERR << "could not open file: \"" << ReportStats
-                 << "\" reason: " << err.message() << "\n";
-    else {
-      report << NumFunctionsProcessed << "\n";
-      report << NumAttributeApplications << "\n";
-
-      for (const auto &name : FunctionsAltered)
-        report << name << "\n";
-
-      report.close();
-    }
-  }
+  if (shouldReportStats)
+    ReportStats(ReportStatsFilename.c_str());
 
   return hasChanged;
 }

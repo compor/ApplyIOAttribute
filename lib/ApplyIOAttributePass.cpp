@@ -114,6 +114,7 @@ static llvm::cl::opt<std::string>
 
 namespace icsa {
 
+static long NumFunctionsProcessed = 0;
 static long NumAttributeApplications = 0;
 static std::set<std::string> FunctionsAltered;
 
@@ -125,6 +126,7 @@ void ApplyIOAttributePass::getAnalysisUsage(llvm::AnalysisUsage &AU) const {
 }
 
 bool ApplyIOAttributePass::runOnModule(llvm::Module &M) {
+  bool shouldReportStats = !ReportStats.empty();
   bool hasChanged = false;
   const auto &TLI = getAnalysis<llvm::TargetLibraryInfoWrapperPass>().getTLI();
   ApplyIOAttribute aioattr(TLI);
@@ -145,18 +147,23 @@ bool ApplyIOAttributePass::runOnModule(llvm::Module &M) {
         !funcWhileList.matches(func.getName().data()))
       continue;
 
-    if (!func.isDeclaration() && !func.hasFnAttribute(aioattr.getIOAttr()) &&
-        aioattr.hasIO(func)) {
+    if (func.isDeclaration())
+      continue;
+
+    if (shouldReportStats)
+      NumFunctionsProcessed++;
+
+    if (!func.hasFnAttribute(aioattr.getIOAttr()) && aioattr.hasIO(func)) {
       hasChanged |= aioattr.apply(func);
 
-      if (!ReportStats.empty()) {
+      if (shouldReportStats) {
         NumAttributeApplications++;
         FunctionsAltered.insert(func.getName());
       }
     }
   }
 
-  if (!ReportStats.empty()) {
+  if (shouldReportStats) {
     std::error_code err;
     llvm::raw_fd_ostream report(ReportStats, err, llvm::sys::fs::F_Text);
 
@@ -164,6 +171,7 @@ bool ApplyIOAttributePass::runOnModule(llvm::Module &M) {
       PLUGIN_ERR << "could not open file: \"" << ReportStats
                  << "\" reason: " << err.message() << "\n";
     else {
+      report << NumFunctionsProcessed << "\n";
       report << NumAttributeApplications << "\n";
 
       for (const auto &name : FunctionsAltered)

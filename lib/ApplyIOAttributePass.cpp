@@ -56,6 +56,9 @@
 #include <system_error>
 // using std::error_code
 
+#include <cstring>
+// using std::strncmp
+
 #include "BWList.hpp"
 
 #include "ApplyIOAttributePass.hpp"
@@ -120,8 +123,26 @@ long NumFunctionsProcessed = 0;
 long NumAttributeApplications = 0;
 std::set<std::string> FunctionsAltered;
 
+void ReportStats(void) {
+  PLUGIN_OUT << NumFunctionsProcessed << "\n";
+  PLUGIN_OUT << NumAttributeApplications << "\n";
+
+  for (const auto &name : FunctionsAltered)
+    PLUGIN_OUT << name << "\n";
+
+  return;
+}
+
 void ReportStats(const char *Filename) {
+  const char *stdout_marker = "--";
+  if (0 == std::strncmp(stdout_marker, Filename, strlen(stdout_marker))) {
+    ReportStats();
+
+    return;
+  }
+
   std::error_code err;
+
   llvm::raw_fd_ostream report(Filename, err, llvm::sys::fs::F_Text);
 
   if (err)
@@ -133,9 +154,9 @@ void ReportStats(const char *Filename) {
 
     for (const auto &name : FunctionsAltered)
       report << name << "\n";
-
-    report.close();
   }
+
+  return;
 }
 
 } // namespace anonymous end

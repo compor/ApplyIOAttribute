@@ -30,14 +30,13 @@
 // using llvm::RegisterStandardPasses
 
 #include "llvm/Support/raw_ostream.h"
-// using llvm::raw_ostream
+// using llvm::raw_fd_ostream
 
 #include "llvm/Support/CommandLine.h"
 // using llvm::cl::opt
 // using llvm::cl::desc
 
 #include "llvm/Support/FileSystem.h"
-// using llvm::raw_fd_ostream
 // using llvm::sys::fs::OpenFlags
 
 #include "llvm/Support/Debug.h"

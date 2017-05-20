@@ -25,7 +25,7 @@ find_package(Boost REQUIRED)
 # aggregate unit test targets under a pseudo-target
 add_custom_target(unittests)
 
-set(PRJ_TEST_NAMES TestApplyIOAttribute)
+set(PRJ_TEST_NAMES Test${PRJ_NAME})
 
 foreach(prj_test_name ${PRJ_TEST_NAMES})
   set(TEST_SOURCES "${prj_test_name}.cpp")

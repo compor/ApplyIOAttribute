@@ -20,6 +20,13 @@
 #include "llvm/ADT/StringRef.h"
 // using llvm::StringRef
 
+namespace llvm {
+class Instruction;
+class Loop;
+class Function;
+class FunctionType;
+} // namespace llvm end
+
 namespace icsa {
 
 class ApplyIOAttribute {
@@ -34,6 +41,7 @@ public:
   }
 
   bool hasIO(const llvm::Function &Func) const;
+  bool hasIO(const llvm::Loop &L) const;
   bool apply(llvm::Function &func) const;
   inline llvm::StringRef getIOAttr() const { return m_IOAttr; }
 

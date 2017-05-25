@@ -8,6 +8,9 @@
 #include "llvm/IR/BasicBlock.h"
 // using llvm::BasicBlock
 
+#include "llvm/Analysis/LoopInfo.h"
+// using llvm::Loop
+
 #include "llvm/IR/Type.h"
 // using llvm::Type
 
@@ -56,6 +59,17 @@ namespace icsa {
 bool ApplyIOAttribute::hasIO(const llvm::Function &Func) const {
   for (const auto &bb : Func)
     for (const auto &inst : bb) {
+      const auto *calledFunc = getCalledFunction(inst);
+      if (calledFunc)
+        return hasCIO(*calledFunc) || hasCxxIO(*calledFunc);
+    }
+
+  return false;
+}
+
+bool ApplyIOAttribute::hasIO(const llvm::Loop &L) const {
+  for (auto bbi = L.block_begin(), bbe = L.block_end(); bbi != bbe; ++bbi)
+    for (const auto &inst : **bbi) {
       const auto *calledFunc = getCalledFunction(inst);
       if (calledFunc)
         return hasCIO(*calledFunc) || hasCxxIO(*calledFunc);
@@ -123,10 +137,11 @@ bool ApplyIOAttribute::hasCxxIO(const llvm::Function &Func) const {
     return false;
 
   const auto &funcName = demangleCxxName(Func.getName().data());
-  const auto &found1 = std::find_if(
-      std::begin(m_CxxIOFuncs), std::end(m_CxxIOFuncs), [&funcName](const auto &e) {
-        return std::string::npos != funcName.find(e);
-      });
+  const auto &found1 =
+      std::find_if(std::begin(m_CxxIOFuncs), std::end(m_CxxIOFuncs),
+                   [&funcName](const auto &e) {
+                     return std::string::npos != funcName.find(e);
+                   });
 
   if (found1 == std::end(m_CxxIOFuncs))
     return false;

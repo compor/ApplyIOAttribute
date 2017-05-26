@@ -6,6 +6,8 @@
 #define APPLYIOATTRIBUTE_HPP
 
 #include "llvm/Analysis/TargetLibraryInfo.h"
+// using llvm::TargetLibraryInfoWrapperPass
+// using llvm::TargetLibraryInfo
 // using llvm::LibFunc
 
 #include <string>

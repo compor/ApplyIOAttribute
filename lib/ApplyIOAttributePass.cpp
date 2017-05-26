@@ -80,9 +80,15 @@
 
 // plugin registration for opt
 
+#define STRINGIFY_UTIL(x) #x
+#define STRINGIFY(x) STRINGIFY_UTIL(x)
+
+#define PRJ_CMDLINE_STRING(x) x " (version: " STRINGIFY(VERSION_STRING) ")"
+
 char icsa::ApplyIOAttributePass::ID = 0;
 static llvm::RegisterPass<icsa::ApplyIOAttributePass>
-    X("apply-io-attribute", "apply IO attribute pass", false, false);
+    X("apply-io-attribute", PRJ_CMDLINE_STRING("apply IO attribute pass"),
+      false, false);
 
 // plugin registration for clang
 

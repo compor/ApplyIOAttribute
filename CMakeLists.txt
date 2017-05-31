@@ -115,27 +115,34 @@ endif()
 #target_link_libraries(${LIB_NAME} PUBLIC ${llvm_libs})
 
 target_compile_definitions(${LIB_NAME} PUBLIC ${LLVM_DEFINITIONS})
-target_compile_definitions(${LIB_NAME} PUBLIC VERSION_STRING=${PRJ_VERSION})
+target_compile_definitions(${LIB_NAME} PRIVATE VERSION_STRING=${PRJ_VERSION})
 
 target_include_directories(${LIB_NAME} PUBLIC ${LLVM_INCLUDE_DIRS})
 target_include_directories(${LIB_NAME} PUBLIC
   $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/include>)
 target_include_directories(${LIB_NAME} PUBLIC
+  $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/include>)
+target_include_directories(${LIB_NAME} PUBLIC
   $<INSTALL_INTERFACE:${CMAKE_INSTALL_PREFIX}/include>)
 
 #
 
+get_property(TRGT_PREFIX TARGET ${LIB_NAME} PROPERTY PREFIX)
+get_property(TRGT_SUFFIX TARGET ${LIB_NAME} PROPERTY SUFFIX)
+
+if(NOT TRGT_PREFIX)
+  set(TRGT_PREFIX ${CMAKE_SHARED_MODULE_PREFIX})
+endif()
+
+if(NOT TRGT_SUFFIX)
+  set(TRGT_SUFFIX ${CMAKE_SHARED_MODULE_SUFFIX})
+endif()
+
+#
+
+set(TESTEE_PREFIX ${TRGT_PREFIX})
+set(TESTEE_SUFFIX ${TRGT_SUFFIX})
 set(TESTEE_LIB ${LIB_NAME})
-get_property(TESTEE_PREFIX TARGET ${TESTEE_LIB} PROPERTY PREFIX)
-get_property(TESTEE_SUFFIX TARGET ${TESTEE_LIB} PROPERTY SUFFIX)
-
-if(NOT TESTEE_PREFIX)
-  set(TESTEE_PREFIX ${CMAKE_SHARED_MODULE_PREFIX})
-endif()
-
-if(NOT TESTEE_SUFFIX)
-  set(TESTEE_SUFFIX ${CMAKE_SHARED_MODULE_SUFFIX})
-endif()
 
 add_subdirectory(unittests)
 add_subdirectory(tests)
@@ -149,7 +156,11 @@ attach_compilation_db_command(${LIB_NAME})
 
 set(PRJ_INSTALL_INCLUDE_DIR "include")
 set(PRJ_INSTALL_SHARE_DIR "share")
+set(PRJ_CONFIG_HEADER_FILE "Config.hpp")
 set(PRJ_CMAKE_CONFIG_FILE "config.cmake")
+
+set(DEPENDEE "")
+
 
 if(NOT PRJ_STANDALONE_BUILD)
   set(PRJ_INSTALL_INCLUDE_DIR ${PRJ_NAME}${PRJ_INSTALL_INCLUDE_DIR})
@@ -159,6 +170,15 @@ endif()
 if(PRJ_STANDALONE_BUILD)
   install(TARGETS ${LIB_NAME} EXPORT ${PRJ_NAME} LIBRARY DESTINATION "lib")
 endif()
+
+file(MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/include")
+set_directory_properties(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES
+  "${CMAKE_CURRENT_BINARY_DIR}/include")
+
+configure_file(
+  "${CMAKE_CURRENT_SOURCE_DIR}/include/${PRJ_CONFIG_HEADER_FILE}.in"
+  "${CMAKE_CURRENT_BINARY_DIR}/include/${PRJ_CONFIG_HEADER_FILE}"
+  @ONLY)
 
 string(TOLOWER ${PRJ_NAME} PRJ_NAME_LOWER)
 configure_file(
@@ -172,6 +192,9 @@ write_basic_package_version_file(
   VERSION ${PRJ_VERSION_SHORT} COMPATIBILITY SameMajorVersion)
 
 install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/include/" 
+  DESTINATION ${PRJ_INSTALL_INCLUDE_DIR}
+  PATTERN "*.in" EXCLUDE)
+install(DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/include/" 
   DESTINATION ${PRJ_INSTALL_INCLUDE_DIR})
 install(DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/share/"
   DESTINATION ${PRJ_INSTALL_SHARE_DIR})

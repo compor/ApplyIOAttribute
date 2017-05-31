@@ -58,6 +58,8 @@
 #include <cstring>
 // using std::strncmp
 
+#include "Config.hpp"
+
 #include "BWList.hpp"
 
 #include "ApplyIOAttributePass.hpp"
@@ -83,12 +85,13 @@
 #define STRINGIFY_UTIL(x) #x
 #define STRINGIFY(x) STRINGIFY_UTIL(x)
 
-#define PRJ_CMDLINE_STRING(x) x " (version: " STRINGIFY(VERSION_STRING) ")"
+#define PRJ_CMDLINE_DESC(x)                                                    \
+  x " (version: " STRINGIFY(APPLYIOATTRIBUTE_VERSION) ")"
 
 char icsa::ApplyIOAttributePass::ID = 0;
 static llvm::RegisterPass<icsa::ApplyIOAttributePass>
-    X("apply-io-attribute", PRJ_CMDLINE_STRING("apply IO attribute pass"),
-      false, false);
+    X("apply-io-attribute", PRJ_CMDLINE_DESC("apply IO attribute pass"), false,
+      false);
 
 // plugin registration for clang
 
@@ -187,7 +190,8 @@ bool ApplyIOAttributePass::runOnModule(llvm::Module &M) {
       funcWhileList.addRegex(funcWhiteListFile);
       funcWhiteListFile.close();
     } else
-      PLUGIN_ERR << "could open file: \'" << FuncWhileListFilename << "\'\n";
+      PLUGIN_ERR << "could not open file: \'" << FuncWhileListFilename
+                 << "\'\n";
   }
 
   for (auto &func : M) {
